@@ -4,28 +4,50 @@ import { Response } from 'express';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { CustomError, logger } from '.';
+import { CustomError, ErrorList, logger } from '.';
 
 // -------------------------------- VARIABLES ---------------------------------
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export default (err: Error | CustomError, res: Response): Response => {
-    logger.error(err);
+interface ErrorItem {
+    detail: string;
+}
 
-    let message = 'An error occurred whilst processing the request. Please try again later.';
+export default (err: Error | CustomError | ErrorList, res: Response): Response => {
+    let errors = [
+        {
+            detail: 'An error occurred whilst processing the request. Please try again later.',
+        },
+    ];
     let status = 500;
 
+    if (err instanceof ErrorList) {
+        status = err.status;
+
+        errors = err.errors.map(
+            (errItem): ErrorItem => {
+                return {
+                    detail: errItem.message,
+                };
+            },
+        );
+
+        logger.error(errors);
+    } else {
+        logger.error(err);
+    }
+
     if (err instanceof CustomError) {
-        message = err.message;
+        errors = [
+            {
+                detail: err.message,
+            },
+        ];
         status = err.status;
     }
 
     return res.status(status).send({
-        errors: [
-            {
-                detail: message,
-            },
-        ],
+        errors,
     });
 };

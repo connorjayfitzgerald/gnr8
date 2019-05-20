@@ -8,6 +8,7 @@ import bodyParser from 'body-parser';
 import { logger } from './utils';
 import { loadRouters } from './api/routers';
 import { appConfig } from './config';
+import { logRequest } from './api/middlewares';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -20,6 +21,7 @@ const run = async (): Promise<void> => {
         const app = express();
 
         app.use(bodyParser.json());
+        app.use(logRequest);
 
         loadRouters(app);
 

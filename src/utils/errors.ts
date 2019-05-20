@@ -17,6 +17,12 @@ export class CustomError extends Error {
     }
 }
 
-export const errors = {
-    nameUndefined: new CustomError('Name must be provided to say hello!', 400),
-};
+export class ErrorList {
+    public errors: Error[];
+    public status: number;
+
+    public constructor(errors: Error[], status: number) {
+        this.errors = errors;
+        this.status = status;
+    }
+}
