@@ -5,8 +5,8 @@ import { body } from 'express-validator/check';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { handleError, checkValidation } from '../utils';
-import { helloWorld } from '../core';
+import { handleError, checkValidation } from '../../utils';
+import { helloWorld } from '../../core';
 
 // -------------------------------- VARIABLES ---------------------------------
 

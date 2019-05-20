@@ -6,7 +6,7 @@ import bodyParser from 'body-parser';
 // ------------------------------ CUSTOM MODULES ------------------------------
 
 import { logger } from './utils';
-import { loadRouters } from './routers';
+import { loadRouters } from './api/routers';
 import { appConfig } from './config';
 
 // -------------------------------- VARIABLES ---------------------------------
