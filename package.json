@@ -7,7 +7,7 @@
     "build": "tsc",
     "test": "jest --coverage",
     "deploy": "npm run build && npm install -g .",
-    "prepublish": "npm run build"
+    "prepare": "npm run build"
   },
   "author": "Connor Fitzgerald",
   "license": "MIT",
