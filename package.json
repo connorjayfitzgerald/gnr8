@@ -1,6 +1,6 @@
 {
   "name": "gnr8",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Command-line utility for scaffolding Node.js APIs",
   "main": "lib/cli.js",
   "scripts": {
@@ -12,8 +12,8 @@
   "author": "Connor Fitzgerald",
   "license": "MIT",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/connorjayfitzgerald/gnr8"
+    "type": "git",
+    "url": "https://github.com/connorjayfitzgerald/gnr8"
   },
   "dependencies": {
     "chalk": "^2.4.2",
