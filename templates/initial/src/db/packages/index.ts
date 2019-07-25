@@ -6,6 +6,4 @@
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export const config = {
-    version: '1.0.0',
-};
+export * from './SayHelloPackage';

@@ -6,6 +6,8 @@
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export const config = {
-    version: '1.0.0',
-};
+export { checkValidation } from './check-validation';
+export { endRequest, endRequestWithFailure } from './end-request';
+export { handleError } from './error-handler';
+export * from './errors';
+export { logger } from './logger';

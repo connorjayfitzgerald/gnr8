@@ -1,0 +1,47 @@
+{
+  "name": "#KEBAB_CASED#",
+  "version": "1.0.0",
+  "description": "#DESCRIPTION#",
+  "main": "dist/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist coverage",
+    "dev": "nodemon",
+    "lint": "eslint src/**/*.ts --fix",
+    "prod": "npm run build && node dist",
+    "test": "jest --coverage"
+  },
+  "author": "Connor Fitzgerald",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "body-parser": "1.19.0",
+    "express": "4.17.0",
+    "express-validator": "^6.1.1",
+    "helmet": "^3.18.0",
+    "oracledb": "3.1.2",
+    "pino": "5.12.5",
+    "pino-pretty": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/body-parser": "1.17.0",
+    "@types/express": "^4.17.0",
+    "@types/helmet": "0.0.43",
+    "@types/jest": "24.0.13",
+    "@types/oracledb": "^3.1.3",
+    "@types/pino": "^5.8.8",
+    "@types/supertest": "2.0.7",
+    "@typescript-eslint/eslint-plugin": "1.9.0",
+    "@typescript-eslint/parser": "1.9.0",
+    "dotenv": "8.0.0",
+    "eslint": "5.16.0",
+    "eslint-config-prettier": "4.3.0",
+    "eslint-plugin-prettier": "3.1.0",
+    "jest": "24.8.0",
+    "nodemon": "1.19.0",
+    "prettier": "1.17.1",
+    "rimraf": "2.6.3",
+    "supertest": "4.0.2",
+    "ts-jest": "24.0.2",
+    "typescript": "3.4.5"
+  }
+}

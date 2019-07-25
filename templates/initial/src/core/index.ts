@@ -2,10 +2,11 @@
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
+import * as hello from './hello';
+import * as health from './health';
+
 // -------------------------------- VARIABLES ---------------------------------
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export const config = {
-    version: '1.0.0',
-};
+export { hello, health };

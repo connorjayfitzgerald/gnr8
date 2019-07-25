@@ -1,0 +1,53 @@
+{
+	"info": {
+		"_postman_id": "71991812-b4a8-4c07-bcbe-cc8986203215",
+		"name": "#SPACE_CASED#",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{GNR8_HOST}}:{{GNR8_PORT}}{{GNR8_BASE}}/health",
+					"protocol": "http",
+					"host": [
+						"{{GNR8_HOST}}"
+					],
+					"port": "{{GNR8_PORT}}{{GNR8_BASE}}",
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Say Hello",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{GNR8_HOST}}:{{GNR8_PORT}}{{GNR8_BASE}}/hello?name=Connor",
+					"protocol": "http",
+					"host": [
+						"{{GNR8_HOST}}"
+					],
+					"port": "{{GNR8_PORT}}{{GNR8_BASE}}",
+					"path": [
+						"hello"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "Connor"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

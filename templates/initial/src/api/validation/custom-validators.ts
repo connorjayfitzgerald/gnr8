@@ -1,11 +1,10 @@
 // ------------------------------- NODE MODULES -------------------------------
 
+import { CustomValidator, Meta } from 'express-validator';
+
 // ------------------------------ CUSTOM MODULES ------------------------------
 
 // -------------------------------- VARIABLES ---------------------------------
 
-// ----------------------------- FILE DEFINITION ------------------------------
-
-export const config = {
-    version: '1.0.0',
-};
+export const isValidParameter = (validParameters: string[]): CustomValidator => (value: string, meta: Meta): boolean =>
+    validParameters.includes(meta.path);
