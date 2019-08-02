@@ -41,8 +41,8 @@ const createTokens = (opts: ScaffoldOptions): Record<string, string> => {
 
     return {
         '#DB_CONN_STRING#': dbDetails.connectionString,
-        '#DB_PASSWORD#': dbDetails.username,
-        '#DB_USER#': dbDetails.password,
+        '#DB_PASSWORD#': dbDetails.password,
+        '#DB_USER#': dbDetails.username,
         '#DESCRIPTION#': opts.description || '',
         '#KEBAB_CASED#': opts.name,
         '#SPACE_CASED#': toSpaceCased(opts.name),
