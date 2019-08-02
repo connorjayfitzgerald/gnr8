@@ -21,8 +21,6 @@ export const isApiHealthy = async (username: string): Promise<boolean> => {
 
         const result = await execute(connection, healthQuery);
 
-        await closeConnection(connection);
-
         const rows = result.rows as Record<string, any>[];
 
         logger.debug(
@@ -37,8 +35,8 @@ export const isApiHealthy = async (username: string): Promise<boolean> => {
     } catch (err) {
         logger.error(err, 'Health check failed. API is unhealthy');
 
-        await closeConnection(connection);
-
         return false;
+    } finally {
+        await closeConnection(connection);
     }
 };

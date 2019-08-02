@@ -15,9 +15,11 @@ test('Able to handle known and unknown ORA, DPI and NJS errors', (): void => {
         startTime: new Date(),
     } as Request;
 
-    const status = jest.fn((): { send: jest.Mock } => ({
-        send: jest.fn(),
-    }));
+    const status = jest.fn(
+        (): { send: jest.Mock } => ({
+            send: jest.fn(),
+        }),
+    );
 
     const res = ({
         timer: setTimeout((): null => null, 10000),

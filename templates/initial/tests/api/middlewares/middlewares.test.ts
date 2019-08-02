@@ -17,11 +17,14 @@ const app = express();
 
 app.use(timeoutMiddleware);
 
-app.get('/', (req, res): void => {
-    req.startTime = new Date();
+app.get(
+    '/',
+    (req, res): void => {
+        req.startTime = new Date();
 
-    setTimeout((): Response => res.status(200).send(), 5000);
-});
+        setTimeout((): Response => res.status(200).send(), 5000);
+    },
+);
 
 test('408 response occurs if request exceeds timeout', async (): Promise<void> => {
     await request(app)

@@ -11,9 +11,11 @@ import { execute, connectionsInUse } from '../__mocks__/oracledb';
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-afterEach((): void => {
-    expect(connectionsInUse).toBeLessThanOrEqual(0);
-});
+afterEach(
+    (): void => {
+        expect(connectionsInUse).toBeLessThanOrEqual(0);
+    },
+);
 
 test('Health check succeeds if the DB is active', async (): Promise<void> => {
     execute.mockResolvedValueOnce(({

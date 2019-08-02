@@ -11,9 +11,11 @@ import { execute, connectionsInUse } from '../__mocks__/oracledb';
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-afterEach((): void => {
-    expect(connectionsInUse).toBeLessThanOrEqual(0);
-});
+afterEach(
+    (): void => {
+        expect(connectionsInUse).toBeLessThanOrEqual(0);
+    },
+);
 
 test('sayHello returns a hello message', async (): Promise<void> => {
     const message = 'Hello, Tester';

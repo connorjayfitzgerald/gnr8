@@ -15,9 +15,11 @@ test('Response is not sent twice', async (): Promise<void> => {
         startTime: new Date(),
     } as Request;
 
-    const status = jest.fn((): { send: jest.Mock } => ({
-        send: jest.fn(),
-    }));
+    const status = jest.fn(
+        (): { send: jest.Mock } => ({
+            send: jest.fn(),
+        }),
+    );
 
     const res = ({
         timer: setTimeout((): null => null, 10000),

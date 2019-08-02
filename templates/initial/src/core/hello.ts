@@ -23,8 +23,6 @@ export const sayHello = async (username: string, name: string): Promise<string> 
 
         const message = await SayHelloPackage.SayHelloProcedure(connection, { name });
 
-        await closeConnection(connection);
-
         logger.debug(logAttrs, 'Successfully said hello');
 
         return message;
@@ -37,8 +35,8 @@ export const sayHello = async (username: string, name: string): Promise<string> 
             'Failed to say hello',
         );
 
-        await closeConnection(connection);
-
         throw err;
+    } finally {
+        await closeConnection(connection);
     }
 };
