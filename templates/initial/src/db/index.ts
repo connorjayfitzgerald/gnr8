@@ -1,10 +1,16 @@
 // ------------------------------- NODE MODULES -------------------------------
 
-import oracledb, { Pool, ExecuteOptions, Result, BindParameters, Connection as BaseConnection, OBJECT } from 'oracledb';
+import oracledb from 'oracledb';
+import {
+    Pool,
+    ExecuteOptions,
+    Result,
+    BindParameters,
+    Connection as BaseConnection,
+    OUT_FORMAT_OBJECT,
+} from 'oracledb';
 
-import { Readable } from 'stream';
-
-oracledb.outFormat = OBJECT;
+oracledb.outFormat = OUT_FORMAT_OBJECT;
 oracledb.extendedMetaData = true;
 
 // ------------------------------ CUSTOM MODULES ------------------------------
@@ -156,27 +162,6 @@ interface CustomExecuteOptions extends ExecuteOptions {
      */
     keepAlive?: boolean;
 }
-
-export const parseLob = (lob: Readable): Promise<Record<string, any> | any[]> =>
-    new Promise((resolve, reject): void => {
-        lob.setEncoding('utf8');
-
-        let result = '';
-
-        lob.on('error', (err: Error): void => {
-            logger.error(err, 'Failed to parse lob');
-
-            return reject(err);
-        })
-            .on('end', (): void => {
-                logger.debug('Succesfully parsed lob');
-
-                return resolve(JSON.parse(result));
-            })
-            .on('data', (chunk: string): void => {
-                result += chunk;
-            });
-    });
 
 export const execute = async (
     connection: Connection,
