@@ -1,6 +1,6 @@
 {
   "name": "gnr8",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Command-line utility for scaffolding Node.js APIs",
   "main": "lib/cli.js",
   "scripts": {
