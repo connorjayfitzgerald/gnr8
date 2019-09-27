@@ -7,6 +7,28 @@
 // ----------------------------- FILE DEFINITION ------------------------------
 
 /**
+ * @see https://codemix.com/opaque-types-in-javascript/
+ */
+type Opaque<K, T> = T & { __TITLE__: K };
+
+export type Username = Opaque<'Username', string>;
+export type Password = Opaque<'Password', string>;
+export type TrackingId = Opaque<'TrackingId', string>;
+
+export type TracingFields = Record<string, any> & {
+    moduleName: string;
+    action: string;
+};
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+export interface $TracingFields extends TracingFields {
+    user: Username;
+    trackingId: string;
+    params: Record<string, any>;
+    query: Record<string, any>;
+}
+
+/**
  * This error structure has been taken from the JSON API standard.
  *
  * @see https://jsonapi.org/format/#error-objects
@@ -35,6 +57,7 @@ declare global {
         interface Request {
             user: string;
             startTime: Date;
+            trackingId: string;
         }
 
         /**

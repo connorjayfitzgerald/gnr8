@@ -4,7 +4,7 @@ import { BIND_OUT } from 'oracledb';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { Connection, execute } from '..';
+import { Connection, execute, assertOutBindsExists } from '..';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -39,8 +39,9 @@ export const SayHelloPackage = {
             message: { dir: BIND_OUT },
         };
 
-        const outBinds = (await execute(connection, sql, bindParams))
-            .outBinds as SayHelloPackage.SayHelloProcedureOutBinds;
+        const { outBinds } = assertOutBindsExists(
+            await execute<SayHelloPackage.SayHelloProcedureOutBinds>(connection, sql, bindParams),
+        );
 
         return outBinds.message;
     },

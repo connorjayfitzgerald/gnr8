@@ -5,10 +5,10 @@ import { query } from 'express-validator';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { hello } from '../../core';
-import { handleError, endRequest, checkValidation } from '../../utils';
-import { isValidParameter } from '../validation/custom-validators';
-import { methodNotAllowed } from '../middlewares';
+import { sayHello } from '.';
+import { handleError, endRequest, checkValidation } from '../../../utils';
+import { isValidParameter } from '../../validation/custom-validators';
+import { methodNotAllowed, setTracing, getTracing } from '../../middlewares';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -22,6 +22,8 @@ export const helloRouter = (app: Router): Router => {
     const router = Router();
 
     app.use(base, router);
+
+    router.use(setTracing({ moduleName: 'health' }));
 
     /**
      * Say hello.
@@ -38,7 +40,11 @@ export const helloRouter = (app: Router): Router => {
             checkValidation,
             async (req: Request, res: Response): Promise<Response> => {
                 try {
-                    const message = await hello.sayHello(req.user, req.query.name);
+                    const {
+                        query: { name },
+                    } = req;
+
+                    const message = await sayHello(getTracing(req), name);
 
                     return endRequest(req, res, 200, { message });
                 } catch (err) {

@@ -4,10 +4,10 @@ import { Router, Request, Response } from 'express';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { endRequest, endRequestWithFailure } from '../../utils';
-import { health } from '../../core';
-import { appConfig } from '../../config';
-import { methodNotAllowed } from '../middlewares';
+import { endRequest, endRequestWithFailure } from '../../../utils';
+import { assertApiIsHealthy } from '.';
+import { appConfig } from '../../../config';
+import { methodNotAllowed, setTracing, getTracing } from '../../middlewares';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -20,6 +20,8 @@ export const healthRouter = (app: Router): Router => {
 
     app.use(base, router);
 
+    router.use(setTracing({ moduleName: 'health' }));
+
     /**
      * Check the health of the application.
      */
@@ -27,15 +29,17 @@ export const healthRouter = (app: Router): Router => {
         .route('/')
         .get(
             async (req: Request, res: Response): Promise<Response> => {
-                const isHealthy = await health.isApiHealthy(req.user);
+                const tracing = getTracing(req);
 
-                if (isHealthy) {
+                try {
+                    await assertApiIsHealthy(tracing);
+
                     return endRequest(req, res, 200, appConfig.health);
+                } catch (err) {
+                    return endRequestWithFailure(req, res, 500, [
+                        { detail: 'API is currently in an unhealthy state', meta: appConfig.health },
+                    ]);
                 }
-
-                return endRequestWithFailure(req, res, 500, [
-                    { detail: 'API is currently in an unhealthy state', meta: appConfig.health },
-                ]);
             },
         )
         .all(methodNotAllowed);

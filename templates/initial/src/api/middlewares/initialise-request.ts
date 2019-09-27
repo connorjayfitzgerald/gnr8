@@ -1,6 +1,7 @@
 // ------------------------------- NODE MODULES -------------------------------
 
 import { Request, Response, NextFunction } from 'express';
+import uuid from 'uuid/v4';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
@@ -12,6 +13,7 @@ import { logger } from '../../utils';
 
 export const initialiseRequest = (req: Request, res: Response, next: NextFunction): void => {
     req.startTime = new Date();
+    req.trackingId = uuid();
 
     logger.info(
         {

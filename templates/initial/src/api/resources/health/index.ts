@@ -2,11 +2,9 @@
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import * as hello from './hello';
-import * as health from './health';
-
 // -------------------------------- VARIABLES ---------------------------------
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export { hello, health };
+export * from './health-actions';
+export * from './health-router';
