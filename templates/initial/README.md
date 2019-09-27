@@ -41,6 +41,7 @@ This will use **jest** to run all tests within the **'./tests** directory.
 **API_PORT** - Port to run the API on. Required.
 **API_VERSION** - Semantic version of the API to be returned when performing a health check.
 **BUILD_NUMBER** - Build number to be returned when performing a health check.
+**DB_CALL_TIMEOUT** - How many seconds before attempting to break execution.
 **DB_CONNECTION_STRING** - Connection string of the database. Required.
 **DB_ENABLE_STATS** - If true, periodically log out database statistics. Defaults to false.
 **DB_STATS_INTERVAL** - Seconds interval at which database statistics should be output. Defaults to 60.
