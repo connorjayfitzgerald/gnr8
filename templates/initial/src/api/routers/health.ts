@@ -7,6 +7,7 @@ import { Router, Request, Response } from 'express';
 import { endRequest, endRequestWithFailure } from '../../utils';
 import { health } from '../../core';
 import { appConfig } from '../../config';
+import { methodNotAllowed } from '../middlewares';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -22,20 +23,22 @@ export const healthRouter = (app: Router): Router => {
     /**
      * Check the health of the application.
      */
-    router.get(
-        '/',
-        async (req: Request, res: Response): Promise<Response> => {
-            const isHealthy = await health.isApiHealthy(req.user);
+    router
+        .route('/')
+        .get(
+            async (req: Request, res: Response): Promise<Response> => {
+                const isHealthy = await health.isApiHealthy(req.user);
 
-            if (isHealthy) {
-                return endRequest(req, res, 200, appConfig.health);
-            }
+                if (isHealthy) {
+                    return endRequest(req, res, 200, appConfig.health);
+                }
 
-            return endRequestWithFailure(req, res, 500, [
-                { detail: 'API is currently in an unhealthy state', meta: appConfig.health },
-            ]);
-        },
-    );
+                return endRequestWithFailure(req, res, 500, [
+                    { detail: 'API is currently in an unhealthy state', meta: appConfig.health },
+                ]);
+            },
+        )
+        .all(methodNotAllowed);
 
     return app;
 };
