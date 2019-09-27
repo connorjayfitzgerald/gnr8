@@ -1,14 +1,14 @@
 // ------------------------------- NODE MODULES -------------------------------
 
+import { Request, Response } from 'express';
+
 // ------------------------------ CUSTOM MODULES ------------------------------
+
+import { errors, handleError } from '../../utils';
 
 // -------------------------------- VARIABLES ---------------------------------
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export * from './catch-bad-json';
-export * from './check-auth';
-export * from './initialise-request';
-export * from './method-not-allowed';
-export * from './not-found';
-export * from './start-timer';
+export const methodNotAllowed = (req: Request, res: Response): Response =>
+    handleError(errors.general.MethodNotAllowed, req, res);
