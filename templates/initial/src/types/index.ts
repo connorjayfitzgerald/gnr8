@@ -58,6 +58,7 @@ declare global {
             startTime: Date;
             moduleName: string;
             trackingId: string;
+            [key: string]: any;
         }
 
         /**
