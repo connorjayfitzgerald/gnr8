@@ -18,7 +18,7 @@ export const assertApiIsHealthy = async (tracing: $TracingFields): Promise<void>
     tracing.action = 'isApiHealthy';
 
     const impl = async (connection: Connection): Promise<void> => {
-        const { rows } = assertRowsExists(await execute(connection, healthQuery));
+        const { rows } = assertRowsExists(await execute(tracing, connection, healthQuery));
 
         if (rows.length !== 1) {
             throw new Error('No rows returned from health check');

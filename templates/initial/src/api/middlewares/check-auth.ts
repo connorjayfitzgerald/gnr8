@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 // ------------------------------ CUSTOM MODULES ------------------------------
 
 import { logger, handleError } from '../../utils';
+import { Username } from '../../types';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -14,7 +15,7 @@ export const checkAuth = async (req: Request, res: Response, next: NextFunction)
     try {
         logger.warn(`Authentication should be implemented in src/api/middlewares/check-auth.ts`);
 
-        req.user = 'NOT_AUTHENTICATED';
+        req.user = 'NOT_AUTHENTICATED' as Username;
 
         return next();
     } catch (err) {

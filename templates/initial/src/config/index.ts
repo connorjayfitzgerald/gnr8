@@ -12,14 +12,17 @@ const {
     API_PORT,
     API_VERSION,
     BUILD_NUMBER,
+    DB_CALL_TIMEOUT,
     DB_CONNECTION_STRING,
-    DB_ENABLE_STATS,
-    DB_STATS_INTERVAL,
+    DB_EXEC_STATS_ENABLED,
+    DB_EXEC_STATS_INTERVAL,
     DB_PASSWORD,
     DB_POOL_ALIAS,
     DB_POOL_INCREMENT,
     DB_POOL_MAX,
     DB_POOL_MIN,
+    DB_POOL_STATS_ENABLED,
+    DB_POOL_STATS_INTERVAL,
     DB_USER,
     EXPRESS_TIMEOUT_SECS,
     GIT_HASH,
@@ -79,12 +82,19 @@ export const dbConfig = {
         increment: DB_POOL_INCREMENT ? parseInt(DB_POOL_INCREMENT) : 1,
     },
     stats: {
-        enabled: DB_ENABLE_STATS === 'true',
-        interval: DB_STATS_INTERVAL ? parseInt(DB_STATS_INTERVAL) : 60,
+        pool: {
+            enabled: DB_POOL_STATS_ENABLED === 'true',
+            interval: DB_POOL_STATS_INTERVAL ? parseInt(DB_POOL_STATS_INTERVAL) : 60,
+        },
+        execution: {
+            enabled: DB_EXEC_STATS_ENABLED === 'true',
+            interval: DB_EXEC_STATS_INTERVAL ? parseInt(DB_EXEC_STATS_INTERVAL) : 10,
+        },
     },
     logging: {
-        logQueries: LOG_SQL === 'true',
+        logSql: LOG_SQL === 'true',
     },
+    timeout: DB_CALL_TIMEOUT ? parseInt(DB_CALL_TIMEOUT) : 180,
 };
 
 export const loggerConfig: LoggerOptions = {

@@ -17,7 +17,6 @@ export type TrackingId = Opaque<'TrackingId', string>;
 
 export type TracingFields = Record<string, any> & {
     moduleName: string;
-    action: string;
 };
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
@@ -55,8 +54,9 @@ declare global {
          * An extension to express.Request.
          */
         interface Request {
-            user: string;
+            user: Username;
             startTime: Date;
+            moduleName: string;
             trackingId: string;
         }
 

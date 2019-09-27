@@ -5,6 +5,7 @@ import { BIND_OUT } from 'oracledb';
 // ------------------------------ CUSTOM MODULES ------------------------------
 
 import { Connection, execute, assertOutBindsExists } from '..';
+import { $TracingFields } from '../../types';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -22,6 +23,7 @@ export namespace SayHelloPackage {
 
 export const SayHelloPackage = {
     SayHelloProcedure: async (
+        tracing: $TracingFields,
         connection: Connection,
         params: SayHelloPackage.SayHelloProcedureParams,
     ): Promise<string> => {
@@ -40,7 +42,7 @@ export const SayHelloPackage = {
         };
 
         const { outBinds } = assertOutBindsExists(
-            await execute<SayHelloPackage.SayHelloProcedureOutBinds>(connection, sql, bindParams),
+            await execute<SayHelloPackage.SayHelloProcedureOutBinds>(tracing, connection, sql, bindParams),
         );
 
         return outBinds.message;

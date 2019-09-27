@@ -16,7 +16,7 @@ export const sayHello = async (tracing: $TracingFields, name: string): Promise<s
     logger.debug(tracing, 'Attempting to say hello');
 
     const impl = async (connection: Connection): Promise<string> =>
-        await SayHelloPackage.SayHelloProcedure(connection, { name });
+        await SayHelloPackage.SayHelloProcedure(tracing, connection, { name });
 
     const message = await usingConnection(tracing, impl);
 
