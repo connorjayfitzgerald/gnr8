@@ -9,8 +9,9 @@ import inquirer, { Question } from 'inquirer';
 // ----------------------------- FILE DEFINITION ------------------------------
 
 export const namePrompt = async (input: string | null): Promise<string> => {
-    const transformer = (input: string): string => input.toLowerCase();
-    const validator = (input: string): boolean | string => (input.length > 0 ? true : 'Please enter a valid name');
+    const transformer = (input: string): string => input.toLowerCase().replace(/\s/g, '');
+    const validator = (input: string): boolean | string =>
+        input.length > 0 && !input.includes(' ') ? true : 'Please enter a valid name';
 
     if (input) {
         const transformed = transformer(input);
@@ -24,7 +25,7 @@ export const namePrompt = async (input: string | null): Promise<string> => {
 
     const question: Question = {
         name: 'name',
-        message: 'What would you like to name the application? e.g. my-new-app',
+        message: 'Kebab-cased name of the application? e.g. my-new-app',
         validate: validator,
         transformer,
         filter: transformer,
