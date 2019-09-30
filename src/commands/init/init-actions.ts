@@ -136,7 +136,7 @@ export const createGitIgnore = async (dest: string): Promise<void> => {
 export const scaffold = async (opts: ScaffoldOptions): Promise<void> => {
     const { name } = opts;
 
-    const src = path.join(__dirname, '..', 'templates', 'initial');
+    const src = path.join(__dirname, '..', '..', '..', 'templates', 'initial');
     const dest = path.join(process.cwd(), name);
 
     await copy(src, dest);
