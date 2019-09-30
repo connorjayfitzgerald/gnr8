@@ -3,7 +3,7 @@
 // ------------------------------- NODE MODULES -------------------------------
 
 import clear from 'clear';
-import program from 'commander';
+import program, { Command } from 'commander';
 import chalk from 'chalk';
 import figlet from 'figlet';
 
@@ -19,25 +19,17 @@ import { scaffold } from './scaffold';
 
 clear();
 
-program
-    .version(config.version)
-    .name('gnr8')
-    .option('-n ,--name <name>', 'Name of the application')
-    .option('-d ,--description <description>', 'Brief description of the application')
-    .option('--no-db', `Don't prompt for database credentials`)
-    .parse(process.argv);
-
-const run = async (): Promise<void> => {
+const init = async (opts: Command): Promise<void> => {
     try {
         console.log(`${chalk.yellowBright(figlet.textSync('gnr8', { horizontalLayout: 'full' }))}\n`);
 
-        const name = await namePrompt(typeof program.name === 'string' ? ((program.name as unknown) as string) : null);
+        const name = await namePrompt(typeof opts.name === 'string' ? `${opts.name}` : null);
 
         const description = await descriptionPrompt(
-            typeof program.description === 'string' ? ((program.description as unknown) as string) : null,
+            typeof opts.description === 'string' ? `${opts.description}` : null,
         );
 
-        const dbDetails = program.db
+        const dbDetails = opts.db
             ? await databasePrompt()
             : {
                   connectionString: '',
@@ -62,4 +54,19 @@ const run = async (): Promise<void> => {
     }
 };
 
-run();
+program
+    .command('init')
+    .description('Scaffold a new API project')
+    .option('-n ,--name <name>', 'Name of the application')
+    .option('-d ,--description <description>', 'Brief description of the application')
+    .option('--no-db', `Don't prompt for database credentials`)
+    .action(init);
+
+program
+    .version(config.version)
+    .name('gnr8')
+    .parse(process.argv);
+
+if (!process.argv.slice(2).length) {
+    program.help();
+}
