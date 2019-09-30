@@ -6,7 +6,7 @@ import helmet from 'helmet';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { loadRouters } from './routers/load-routers';
+import { loadRouters } from './resources/load-routers';
 import { appConfig } from '../config';
 import { initialiseRequest, startTimer, catchBadJson, notFound } from './middlewares';
 

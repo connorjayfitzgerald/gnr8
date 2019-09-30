@@ -4,8 +4,8 @@ import { Router } from 'express';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { helloRouter } from '../resources/hello';
-import { healthRouter } from '../resources/health';
+import { helloRouter } from './hello';
+import { healthRouter } from './health';
 import { checkAuth } from '../middlewares';
 
 // -------------------------------- VARIABLES ---------------------------------
