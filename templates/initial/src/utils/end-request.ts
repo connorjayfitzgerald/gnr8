@@ -52,13 +52,16 @@ export const endRequestWithFailure = (
 
     const endTime = new Date();
 
+    const { user, startTime, method, originalUrl, trackingId } = req;
+
     const logAttrs = {
-        user: req.user,
-        startTime: req.startTime,
+        trackingId,
+        user,
+        startTime,
         endTime,
         duration: endTime.getTime() - req.startTime.getTime(),
-        method: req.method,
-        path: req.originalUrl,
+        method,
+        path: originalUrl,
     };
 
     if (res.headersSent) {

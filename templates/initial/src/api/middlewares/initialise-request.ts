@@ -12,12 +12,16 @@ import { logger } from '../../utils';
 // ----------------------------- FILE DEFINITION ------------------------------
 
 export const initialiseRequest = (req: Request, res: Response, next: NextFunction): void => {
-    req.startTime = new Date();
-    req.trackingId = uuid();
+    const startTime = new Date();
+    const trackingId = uuid();
+
+    req.startTime = startTime;
+    req.trackingId = trackingId;
 
     logger.info(
         {
-            startTime: req.startTime,
+            startTime,
+            trackingId,
             method: req.method,
             path: req.originalUrl,
         },
