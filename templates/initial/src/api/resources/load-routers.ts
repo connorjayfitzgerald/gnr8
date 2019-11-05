@@ -6,18 +6,23 @@ import { Router } from 'express';
 
 import { helloRouter } from './hello';
 import { healthRouter } from './health';
-import { checkAuth } from '../middlewares';
+import { checkAuth, updateModuleName } from '../middlewares';
 
 // -------------------------------- VARIABLES ---------------------------------
 
-const routers: ((app: Router) => Router)[] = [helloRouter, healthRouter];
+const unsecuredRouters: ((app: Router) => Router)[] = [];
+const securedRouters: ((app: Router) => Router)[] = [helloRouter, healthRouter];
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
 export const loadRouters = (app: Router): void => {
+    app.use(updateModuleName());
+
+    unsecuredRouters.forEach((router): Router => router(app));
+
     app.use(checkAuth);
 
-    routers.forEach((router): Router => router(app));
+    securedRouters.forEach((router): Router => router(app));
 
     return;
 };

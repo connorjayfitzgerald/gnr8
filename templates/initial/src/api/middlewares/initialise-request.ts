@@ -1,32 +1,42 @@
 // ------------------------------- NODE MODULES -------------------------------
 
 import { Request, Response, NextFunction } from 'express';
-import uuid from 'uuid/v4';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { logger } from '../../utils';
+import { Context } from '../../utils/Context';
 
 // -------------------------------- VARIABLES ---------------------------------
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export const initialiseRequest = (req: Request, res: Response, next: NextFunction): void => {
-    const startTime = new Date();
-    const trackingId = uuid();
+export const initialiseRequest = (req: Request, _res: Response, next: NextFunction): void => {
+    const context = new Context();
 
-    req.startTime = startTime;
-    req.trackingId = trackingId;
+    req.context = context;
 
-    logger.info(
-        {
-            startTime,
-            trackingId,
-            method: req.method,
-            path: req.originalUrl,
-        },
-        'Request received',
-    );
+    const { method, originalUrl, body } = req;
+
+    // On receiving the request log the path and method
+    // If debug, also log the body
+    if (context.log.isLevelEnabled('debug')) {
+        context.log.debug(
+            {
+                method: method,
+                path: originalUrl,
+                body,
+            },
+            'Request received',
+        );
+    } else {
+        context.log.info(
+            {
+                method: method,
+                path: originalUrl,
+            },
+            'Request received',
+        );
+    }
 
     return next();
 };

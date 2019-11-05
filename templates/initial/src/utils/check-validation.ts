@@ -13,7 +13,7 @@ import { CommonError } from '../types';
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export const checkValidation = (req: Request, res: Response, next: NextFunction): Response | void => {
+export const checkValidation = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {

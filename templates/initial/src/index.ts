@@ -6,8 +6,8 @@ import { Pool } from 'oracledb';
 
 import { logger } from './utils';
 import { appConfig, loggerConfig } from './config';
-import { createPool } from './db';
-import { app } from './api';
+import { createPool } from './db/db';
+import { app } from './api/api';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -36,7 +36,7 @@ const run = async (): Promise<void> => {
             logger.warn(`Express request timeout set to ${appConfig.timeout} seconds`);
         });
     } catch (err) {
-        logger.error(err);
+        logger.error({ err });
 
         if (pool) {
             await pool.close();

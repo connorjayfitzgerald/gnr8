@@ -1,12 +1,22 @@
 // ------------------------------- NODE MODULES -------------------------------
 
 import inquirer, { Question } from 'inquirer';
+import { readdir } from 'fs-extra';
+import path from 'path';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
 // -------------------------------- VARIABLES ---------------------------------
 
 // ----------------------------- FILE DEFINITION ------------------------------
+
+const assertDirDoesntExist = async (dirPath: string): Promise<void> =>
+    new Promise(
+        (resolve, reject): Promise<void> =>
+            readdir(dirPath)
+                .then((): void => reject(new Error('App already initialised')))
+                .catch(resolve),
+    );
 
 export const namePrompt = async (input: string | null): Promise<string> => {
     const transformer = (input: string): string => input.toLowerCase().replace(/\s/g, '');
@@ -33,7 +43,11 @@ export const namePrompt = async (input: string | null): Promise<string> => {
 
     const result = await inquirer.prompt([question]);
 
-    return result.name;
+    const name = result.name;
+
+    await assertDirDoesntExist(path.join(process.cwd(), name));
+
+    return name;
 };
 
 export const descriptionPrompt = async (description: string | null): Promise<string> => {

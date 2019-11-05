@@ -7,7 +7,7 @@ import { Router, Request, Response } from 'express';
 import { endRequest, endRequestWithFailure } from '../../../utils';
 import { assertApiIsHealthy } from '.';
 import { appConfig } from '../../../config';
-import { methodNotAllowed, setTracing, getTracing } from '../../middlewares';
+import { methodNotAllowed } from '../../middlewares';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -20,8 +20,6 @@ export const healthRouter = (app: Router): Router => {
 
     app.use(base, router);
 
-    router.use(setTracing({ moduleName: 'health' }));
-
     /**
      * Check the health of the application.
      */
@@ -29,10 +27,10 @@ export const healthRouter = (app: Router): Router => {
         .route('/')
         .get(
             async (req: Request, res: Response): Promise<Response> => {
-                const tracing = getTracing(req);
-
                 try {
-                    await assertApiIsHealthy(tracing);
+                    const { context } = req;
+
+                    await assertApiIsHealthy(context);
 
                     return endRequest(req, res, 200, appConfig.health);
                 } catch (err) {

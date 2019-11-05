@@ -21,6 +21,7 @@ interface ScaffoldOptions {
         username: string;
         password: string;
     };
+    skipInstall?: boolean;
 }
 
 const toSpaceCased = (kebabCased: string): string => {
@@ -134,7 +135,7 @@ export const createGitIgnore = async (dest: string): Promise<void> => {
 };
 
 export const scaffold = async (opts: ScaffoldOptions): Promise<void> => {
-    const { name } = opts;
+    const { name, skipInstall = false } = opts;
 
     const src = path.join(__dirname, '..', '..', '..', 'templates', 'initial');
     const dest = path.join(process.cwd(), name);
@@ -147,5 +148,7 @@ export const scaffold = async (opts: ScaffoldOptions): Promise<void> => {
 
     await createGitIgnore(dest);
 
-    await runCommand('npm install', dest, 'Installing node modules');
+    if (skipInstall !== true) {
+        await runCommand('npm install', dest, 'Installing node modules');
+    }
 };

@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { endRequest, endRequestWithFailure } from '../../src/utils';
+import { endRequest, endRequestWithFailure, Context } from '../../src/utils';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -12,14 +12,12 @@ import { endRequest, endRequestWithFailure } from '../../src/utils';
 
 test('Response is not sent twice', async (): Promise<void> => {
     const req = {
-        startTime: new Date(),
+        context: new Context(),
     } as Request;
 
-    const status = jest.fn(
-        (): { send: jest.Mock } => ({
-            send: jest.fn(),
-        }),
-    );
+    const status = jest.fn((): { send: jest.Mock } => ({
+        send: jest.fn(),
+    }));
 
     const res = ({
         timer: setTimeout((): null => null, 10000),

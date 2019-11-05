@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist coverage",
-    "dev": "nodemon",
+    "start": "nodemon",
     "lint": "eslint src/**/*.ts --fix",
     "prod": "npm run build && node dist",
     "test": "jest --coverage"
@@ -44,6 +44,7 @@
     "rimraf": "3.0.0",
     "supertest": "4.0.2",
     "ts-jest": "24.1.0",
+    "ts-node": "8.4.0",
     "typescript": "3.6.3"
   }
 }

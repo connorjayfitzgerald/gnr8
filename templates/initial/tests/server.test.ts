@@ -4,7 +4,7 @@ import { Pool } from 'oracledb';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { createPool } from '../src/db';
+import { createPool } from '../src/db/db';
 import { createPool as createPoolMock } from './__mocks__/oracledb';
 import { logger } from '../src/utils';
 
@@ -12,11 +12,9 @@ import { logger } from '../src/utils';
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-beforeEach(
-    (): void => {
-        jest.resetModules();
-    },
-);
+beforeEach((): void => {
+    jest.resetModules();
+});
 
 test('API fails to start if environment variables are missing', async (): Promise<void> => {
     process.env.API_PORT = '';
@@ -41,11 +39,9 @@ test('API defaults set correctly if not provided', async (): Promise<void> => {
 });
 
 const wait = (seconds: number): Promise<void> =>
-    new Promise(
-        (resolve): void => {
-            setTimeout(resolve, seconds * 1000);
-        },
-    );
+    new Promise((resolve): void => {
+        setTimeout(resolve, seconds * 1000);
+    });
 
 test('API successfully creates connection pool and starts', async (): Promise<void> => {
     process.env = { ...process.env, DB_ENABLE_STATS: 'true', DB_STATS_INTERVAL: '2' };

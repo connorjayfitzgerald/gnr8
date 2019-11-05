@@ -16,7 +16,7 @@ import { endRequestWithFailure } from '../../utils';
  */
 export const startTimer = (req: Request, res: Response, next: NextFunction): void => {
     res.timer = setTimeout(
-        (): Response =>
+        async (): Promise<Response> =>
             endRequestWithFailure(req, res, 408, [
                 {
                     detail: 'Request has timed out',

@@ -10,5 +10,5 @@ import { errors, handleError } from '../../utils';
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export const methodNotAllowed = (req: Request, res: Response): Response =>
+export const methodNotAllowed = (req: Request, res: Response): Promise<Response> =>
     handleError(errors.general.MethodNotAllowed, req, res);

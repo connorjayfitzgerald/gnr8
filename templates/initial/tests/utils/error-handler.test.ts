@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { handleError } from '../../src/utils';
+import { handleError, Context } from '../../src/utils';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -12,14 +12,12 @@ import { handleError } from '../../src/utils';
 
 test('Able to handle known and unknown ORA, DPI and NJS errors', (): void => {
     const req = {
-        startTime: new Date(),
+        context: new Context(),
     } as Request;
 
-    const status = jest.fn(
-        (): { send: jest.Mock } => ({
-            send: jest.fn(),
-        }),
-    );
+    const status = jest.fn((): { send: jest.Mock } => ({
+        send: jest.fn(),
+    }));
 
     const res = ({
         timer: setTimeout((): null => null, 10000),
@@ -36,5 +34,5 @@ test('Able to handle known and unknown ORA, DPI and NJS errors', (): void => {
         new Error('NJS-12345: doesnt exist'),
     ];
 
-    errors.forEach((err): Response => handleError(err, req, res));
+    errors.forEach((err): Promise<Response> => handleError(err, req, res));
 });

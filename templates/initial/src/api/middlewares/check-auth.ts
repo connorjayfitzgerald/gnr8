@@ -15,11 +15,11 @@ export const checkAuth = async (req: Request, res: Response, next: NextFunction)
     try {
         logger.warn(`Authentication should be implemented in src/api/middlewares/check-auth.ts`);
 
-        req.user = 'NOT_AUTHENTICATED' as Username;
+        req.context.username = 'NOT_AUTHENTICATED' as Username;
 
         return next();
     } catch (err) {
-        logger.error(err, 'Authentication failed');
+        logger.error({ err }, 'Authentication failed');
 
         return handleError(err, req, res);
     }

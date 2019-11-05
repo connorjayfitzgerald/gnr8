@@ -33,11 +33,11 @@ const processError = (err: Error | CustomError): ErrorItem => {
     return result;
 };
 
-export const handleError = (err: Error | CustomError, req: Request, res: Response): Response => {
-    let errors: ErrorItem[] = [];
+export const handleError = (err: Error | CustomError, req: Request, res: Response): Promise<Response> => {
+    const errors: ErrorItem[] = [];
     let status = 500;
 
-    logger.error(err);
+    logger.error({ err });
 
     if (err.message.includes('ORA-')) {
         const startIndex = err.message.indexOf('ORA-');

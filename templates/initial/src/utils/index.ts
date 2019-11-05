@@ -6,8 +6,9 @@
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export { checkValidation } from './check-validation';
-export { endRequest, endRequestWithFailure } from './end-request';
-export { handleError } from './error-handler';
+export * from './check-validation';
+export * from './Context';
+export * from './end-request';
+export * from './error-handler';
 export * from './errors';
-export { logger } from './logger';
+export * from './logger';

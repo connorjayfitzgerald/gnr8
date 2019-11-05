@@ -21,6 +21,7 @@ program
     .description('Scaffold a new API project')
     .option('-n ,--name <name>', 'Name of the application')
     .option('-d ,--description <description>', 'Brief description of the application')
+    .option('-s , --skip-install', 'Skip installation of dependencies')
     .option('--no-db', `Don't prompt for database credentials`)
     .action(init);
 

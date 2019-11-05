@@ -8,7 +8,7 @@ import helmet from 'helmet';
 
 import { loadRouters } from './resources/load-routers';
 import { appConfig } from '../config';
-import { initialiseRequest, startTimer, catchBadJson, notFound } from './middlewares';
+import { initialiseRequest, startTimer, notFound, errorHandler } from './middlewares';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -18,19 +18,20 @@ const { base } = appConfig;
 
 export const app = express();
 
-const router = Router();
-
 app.use(helmet());
+
+app.use(initialiseRequest);
 app.use(startTimer);
 
+app.use(bodyParser.json());
+
+const router = Router();
+
+loadRouters(router);
+
 app.use(base, router);
-
-router.use(bodyParser.json());
-router.use(catchBadJson);
-
-router.use(initialiseRequest);
 
 // Return 404 if no routers not satisfied
 app.use(notFound);
 
-loadRouters(router);
+app.use(errorHandler);

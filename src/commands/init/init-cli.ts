@@ -33,17 +33,31 @@ export const init = async (opts: Command): Promise<void> => {
 
         console.log('\n');
 
-        await scaffold({ name, description, dbDetails });
+        const { skipInstall } = opts;
+
+        await scaffold({ name, description, dbDetails, skipInstall });
 
         console.log(chalk.green('\nSuccess!'));
+
+        if (skipInstall === true) {
+            console.warn(
+                chalk.yellow(`\nnode_modules have not been installed. You'll need to run "npm install" first!`),
+            );
+        }
+
         console.log(`\nTo get started, run the following commands:\n`);
 
         console.log(chalk.cyan(`cd ${name}`));
-        console.log(chalk.cyan('npm run dev'));
+        if (skipInstall) {
+            console.log(chalk.cyan(`npm install`));
+        }
+        console.log(chalk.cyan('npm start'));
 
         console.log('\nThen try sending a GET request to http://localhost:3000/hello?name=Connor');
     } catch (err) {
-        console.log('Failed to generate');
-        console.log(err.message);
+        console.error('Failed to generate');
+        console.error(err.message);
+
+        process.exit(1);
     }
 };

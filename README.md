@@ -6,13 +6,11 @@ gnr8 is a command-line utility for scaffolding a new RESTful API.
 
 The current structure consists of an Express.js API which communicates with an Oracle database.
 
-### Installation and Usage
+### Prerequisites
 
-Generated APIs are written in Typescript. In order for these to be run in development mode, [ts-node](https://github.com/TypeStrong/ts-node) can be used. Install this globally with:
+You'll need to follow the installation instructions for oracledb [here](https://oracle.github.io/node-oracledb/INSTALL.html#quickstart).
 
-```
-npm i -g ts-node
-```
+### Installation
 
 If you're using npm version 5.2.0 or greater, you can use npx so as to always use the latest version of gnr8.
 
@@ -26,18 +24,30 @@ Otherwise, you should install gnr8 globally and have your global npm modules on 
 $ npm i -g gnr8
 ```
 
-You will then be prompted for some information before gnr8 scaffolds a new application.
+#### Usage
 
-#### Options
+Scaffold a new application by running...
 
-##### -n --name
-Specify the name of the application via the terminal. Name should be lower kebab case, e.g. my-new-app
+```
+$ npx gnr8 init
+or
+$ gnr8 init
+if installed globally
+```
 
-##### -d --description
- Specify a description via the terminal.
+###### Options
 
-##### --no-db
+###### -n --name
+Specify the name of the application via the terminal. Name should be lower kebab case, e.g. my-new-app.
+
+###### -d --description
+Specify a description via the terminal.
+
+###### --no-db
 gnr8 should not prompt for database credentials, as these will be added later.
+
+###### --skip-install
+Do not install dependencies. This will need to be done later with 'npm install'.
 
 ### Roadmap
 
@@ -46,4 +56,4 @@ gnr8 should not prompt for database credentials, as these will be added later.
 
 ### People
 
-gnr8 was developed by [Connor Fitzgerald](https://github.com/connorjayfitzgerald)
+gnr8 was developed by [Connor Fitzgerald](https://github.com/connorjayfitzgerald).

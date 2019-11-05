@@ -31,10 +31,10 @@ export const closeConnection = jest.fn(
 );
 
 export const execute = jest.fn(
-    async (): Promise<Result> => {
+    async (): Promise<Result<unknown>> => {
         return ({
             rows: [{ roleName: 'TEST' }],
-        } as unknown) as Result;
+        } as unknown) as Result<unknown>;
     },
 );
 

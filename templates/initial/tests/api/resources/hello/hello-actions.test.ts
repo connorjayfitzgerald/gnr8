@@ -4,18 +4,17 @@ import { Result } from 'oracledb';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { hello } from '../../src/core';
-import { execute, connectionsInUse } from '../__mocks__/oracledb';
+import * as hello from '../../../../src/api/resources/hello';
+import { execute } from '../../../__mocks__/oracledb';
+import { Context } from '../../../../src/utils';
+import { Username } from '../../../../src/types';
 
 // -------------------------------- VARIABLES ---------------------------------
 
-// ----------------------------- FILE DEFINITION ------------------------------
+const context = new Context();
+context.username = 'AUTHED_USER' as Username;
 
-afterEach(
-    (): void => {
-        expect(connectionsInUse).toBeLessThanOrEqual(0);
-    },
-);
+// ----------------------------- FILE DEFINITION ------------------------------
 
 test('sayHello returns a hello message', async (): Promise<void> => {
     const message = 'Hello, Tester';
@@ -24,9 +23,9 @@ test('sayHello returns a hello message', async (): Promise<void> => {
         outBinds: {
             message,
         },
-    } as unknown) as Result);
+    } as unknown) as Result<{ message: string }>);
 
-    const result = await hello.sayHello('authedUser', 'Tester');
+    const result = await hello.sayHello(context, 'Tester');
 
     expect(result).toBe(message);
 });
@@ -39,7 +38,7 @@ test('sayHello is able to handle DB errors', async (): Promise<void> => {
     let error = null;
 
     try {
-        await hello.sayHello('authedUser', 'Tester');
+        await hello.sayHello(context, 'Tester');
     } catch (err) {
         error = err;
     }

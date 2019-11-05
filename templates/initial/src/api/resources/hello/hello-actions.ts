@@ -2,25 +2,19 @@
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { SayHelloPackage, usingConnection, Connection } from '../../../db';
-import { logger } from '../../../utils';
-import { $TracingFields } from '../../../types';
+import { SayHelloPackage } from '../../../db/db';
+import { Context } from '../../../utils';
 
 // -------------------------------- VARIABLES ---------------------------------
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export const sayHello = async (tracing: $TracingFields, name: string): Promise<string> => {
-    tracing.action = 'sayHello';
+export const sayHello = async (context: Context, name: string): Promise<string> => {
+    context.log.debug('Attempting to say hello');
 
-    logger.debug(tracing, 'Attempting to say hello');
+    const message = await SayHelloPackage.SayHelloProcedure(context, { name });
 
-    const impl = async (connection: Connection): Promise<string> =>
-        await SayHelloPackage.SayHelloProcedure(tracing, connection, { name });
-
-    const message = await usingConnection(tracing, impl);
-
-    logger.debug(tracing, 'Successfully said hello');
+    context.log.debug('Successfully said hello');
 
     return message;
 };

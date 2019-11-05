@@ -1,6 +1,6 @@
 // ------------------------------- NODE MODULES -------------------------------
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
@@ -8,10 +8,14 @@ import { Request, Response, NextFunction } from 'express';
 
 // ----------------------------- FILE DEFINITION ------------------------------
 
-export const catchBadJson = (err: Error, req: Request, res: Response, next: NextFunction): Response | void => {
-    if (err instanceof SyntaxError) {
-        return res.status(400).send({ errors: [{ detail: 'Malformed request body' }] });
-    }
+export const updateModuleName = (prefix?: string): RequestHandler => (
+    req: Request,
+    _res: Response,
+    next: NextFunction,
+): void => {
+    const moduleName = `${prefix || ''}${req.path.split('/')[1]}`;
+
+    req.context.moduleName = moduleName;
 
     return next();
 };

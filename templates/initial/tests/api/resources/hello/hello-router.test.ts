@@ -1,4 +1,4 @@
-jest.mock('../../../src/core/hello.ts');
+jest.mock('../../../../src/api/resources/hello/hello-actions.ts');
 
 // ------------------------------- NODE MODULES -------------------------------
 
@@ -6,10 +6,10 @@ import request from 'supertest';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { hello } from '../../../src/core';
-import { app } from '../../../src/api';
-import { appConfig } from '../../../src/config';
-import { CustomError } from '../../../src/utils';
+import * as hello from '../../../../src/api/resources/hello';
+import { app } from '../../../../src/api/api';
+import { appConfig } from '../../../../src/config';
+import { CustomError } from '../../../../src/utils';
 
 // -------------------------------- VARIABLES ---------------------------------
 

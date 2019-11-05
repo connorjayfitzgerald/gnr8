@@ -10,15 +10,15 @@ import oracledb, {
     BindParameters,
     Connection as BaseConnection,
 } from 'oracledb';
-import { OUT_FORMAT_OBJECT } from 'oracledb';
-import { Username, Password, $TracingFields } from '../types';
+import { OUT_FORMAT_OBJECT, POOL_STATUS_CLOSED } from 'oracledb';
+import { Username, Password } from '../types';
 
 oracledb.outFormat = OUT_FORMAT_OBJECT;
 oracledb.extendedMetaData = true;
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { logger, CustomError } from '../utils';
+import { logger, CustomError, Context } from '../utils';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -27,16 +27,14 @@ import { dbConfig } from '../config';
 // ----------------------------- FILE DEFINITION ------------------------------
 
 export interface Connection extends BaseConnection {
-    username: Username;
-    id: string;
     heldSince: Date;
     executions: number;
     warningTimer: NodeJS.Timer;
     source: string;
 }
 
-export const getLobData = async <T>(tracing: $TracingFields, lob: Lob): Promise<T> => {
-    logger.debug(tracing, 'Parsing lob data');
+export const getLobData = async <T>(context: Context, lob: Lob): Promise<T> => {
+    context.log.debug('Parsing lob data');
 
     const data = (await lob.getData()) as string;
 
@@ -47,24 +45,23 @@ interface GetUserConnectionOptions {
     newPassword?: string;
 }
 
-const initialiseConnection = (tracing: $TracingFields, connection: Connection): Connection => {
-    const { user, moduleName, action, trackingId } = tracing;
+const initialiseConnection = (context: Context, connection: Connection, usernameOverride?: Username): Connection => {
+    const { moduleName, trackingId } = context;
 
-    (connection.callTimeout = dbConfig.timeout * 1000), (connection.username = user);
-    connection.clientId = user;
+    const username = usernameOverride || context.username;
+
+    connection.callTimeout = dbConfig.timeout * 1000;
+    connection.clientId = username;
     connection.module = moduleName;
-    connection.action = action;
-    connection.id = trackingId;
+    connection.action = trackingId;
     connection.heldSince = new Date();
     connection.executions = 0;
-    connection.source = `${moduleName}.${action}`;
     connection.warningTimer = setInterval((): void => {
-        const { username, id, heldSince, executions, source } = connection;
+        const { heldSince, executions, source } = connection;
         const heldFor = new Date().getTime() - heldSince.getTime();
 
-        logger.warn(
+        context.log.warn(
             {
-                id,
                 username,
                 heldSince,
                 heldFor,
@@ -81,12 +78,12 @@ const initialiseConnection = (tracing: $TracingFields, connection: Connection): 
 };
 
 export const getUserConnection = async (
-    tracing: $TracingFields,
+    context: Context,
     username: Username,
     password: Password,
     options?: GetUserConnectionOptions,
 ): Promise<Connection> => {
-    logger.debug({ ...tracing, username }, 'Obtaining user connection');
+    context.log.debug({ connectionUser: username }, 'Obtaining user connection');
 
     const connectionAttrs: ConnectionAttributes = {
         connectionString: dbConfig.connection.string,
@@ -100,28 +97,28 @@ export const getUserConnection = async (
 
     const connection = (await oracledb.getConnection(connectionAttrs)) as Connection;
 
-    initialiseConnection(tracing, connection);
+    initialiseConnection(context, connection, username);
 
-    const { id, heldSince, source, executions } = connection;
+    const { heldSince, source, executions } = connection;
 
-    logger.trace({ ...tracing, id, username, heldSince, source, executions }, 'Connection successfully obtained');
+    context.log.trace({ connectionUser: username, heldSince, source, executions }, 'Connection successfully obtained');
 
     return connection;
 };
 
-export const getPooledConnection = async (tracing: $TracingFields): Promise<Connection> => {
-    logger.trace(tracing, 'Obtaining connection from pool');
+export const getPooledConnection = async (context: Context): Promise<Connection> => {
+    context.log.trace('Obtaining connection from pool');
 
     const connection = (await oracledb.getConnection(dbConfig.pool.alias)) as Connection;
 
-    initialiseConnection(tracing, connection);
+    initialiseConnection(context, connection);
 
-    const { id, heldSince, source, executions } = connection;
+    context.connection = connection;
 
-    logger.trace(
+    const { heldSince, source, executions } = connection;
+
+    context.log.trace(
         {
-            ...tracing,
-            id,
             heldSince,
             executions,
             source,
@@ -130,6 +127,105 @@ export const getPooledConnection = async (tracing: $TracingFields): Promise<Conn
     );
 
     return connection;
+};
+
+export interface PoolStats {
+    statistics: {
+        maxQueueLength: number;
+        minTimeInQueue: number;
+        maxTimeInQueue: number;
+        averageTimeInQueue: number;
+        connectionsInUse: number;
+        connectionsOpen: number;
+    };
+    totals: {
+        upTime: number;
+        connectionRequests: number;
+        requestsEnqueued: number;
+        requestsDequeued: number;
+        failedRequests: number;
+        requestTimeouts: number;
+        timeInQueue: number;
+    };
+    attributes: {
+        alias?: string;
+        status: number;
+        queueTimeout: number;
+        minConnections: number;
+        maxConnections: number;
+        increment: number;
+        timeout: number;
+        pingInterval: number;
+        sessionCallback: string;
+        stmtCacheSize: number;
+        threadpoolSize: number;
+    };
+}
+
+export const getPoolStats = async (poolAlias: string): Promise<PoolStats> => {
+    const pool = (await oracledb.getPool(poolAlias)) as any;
+
+    if (!pool) {
+        throw new Error(`No pool exists with alias ${poolAlias}`);
+    }
+
+    if (pool.status === POOL_STATUS_CLOSED) {
+        throw new Error('Unable to get statistics from a closed connection pool');
+    }
+
+    if (pool._enableStats !== true) {
+        throw new Error('Pool statistics disabled');
+    }
+
+    let averageTimeInQueue = 0;
+
+    if (pool._totalRequestsEnqueued !== 0) {
+        averageTimeInQueue = Math.round(pool._totalTimeInQueue / pool._totalRequestsEnqueued);
+    }
+
+    let sessionCallback = pool.sessionCallback;
+
+    switch (typeof pool.sessionCallback) {
+        case 'function':
+            sessionCallback = pool.sessionCallback.name;
+            break;
+        case 'string':
+            sessionCallback = '"' + pool.sessionCallback + '"';
+            break;
+    }
+
+    return {
+        statistics: {
+            maxQueueLength: pool._maxQueueLength,
+            minTimeInQueue: pool._minTimeInQueue,
+            maxTimeInQueue: pool._maxTimeInQueue,
+            averageTimeInQueue,
+            connectionsInUse: pool.connectionsInUse,
+            connectionsOpen: pool.connectionsOpen,
+        },
+        totals: {
+            upTime: Date.now() - pool._createdDate,
+            connectionRequests: pool._totalConnectionRequests,
+            requestsEnqueued: pool._totalRequestsEnqueued,
+            requestsDequeued: pool._totalRequestsDequeued,
+            failedRequests: pool._totalFailedRequests,
+            requestTimeouts: pool._totalRequestTimeouts,
+            timeInQueue: pool._totalTimeInQueue,
+        },
+        attributes: {
+            alias: pool.poolAlias,
+            status: pool.status,
+            queueTimeout: pool.queueTimeout,
+            minConnections: pool.poolMin,
+            maxConnections: pool.poolMax,
+            increment: pool.poolIncrement,
+            timeout: pool.poolTimeout,
+            pingInterval: pool.poolPingInterval,
+            sessionCallback,
+            stmtCacheSize: pool.stmtCacheSize,
+            threadpoolSize: parseInt(process.env.UV_THREADPOOL_SIZE || '-1'),
+        },
+    };
 };
 
 export const createPool = async (): Promise<Pool> => {
@@ -152,7 +248,9 @@ export const createPool = async (): Promise<Pool> => {
 
     if (_enableStats) {
         setInterval((): void => {
-            pool._logStats();
+            getPoolStats(dbConfig.pool.alias)
+                .then((stats): void => logger.debug(stats, 'Connection pool statistics'))
+                .catch((err): void => logger.error({ err }, 'Unable to determine pool statistics'));
 
             if (pool.connectionsInUse === pool.poolMax) {
                 logger.warn(`All ${pool.connectionsInUse} connections are currently in use`);
@@ -167,15 +265,12 @@ export const createPool = async (): Promise<Pool> => {
     return pool;
 };
 
-export const closeConnection = async (tracing: $TracingFields, connection: Connection | null): Promise<void> => {
+export const closeConnection = async (context: Context, connection?: Connection): Promise<void> => {
     if (!connection) return;
 
-    const { username, id, warningTimer, heldSince, executions, source } = connection;
+    const { warningTimer, heldSince, executions, source } = connection;
 
     const logAttrs = {
-        ...tracing,
-        id,
-        username,
         heldSince,
         executions,
         source,
@@ -186,10 +281,10 @@ export const closeConnection = async (tracing: $TracingFields, connection: Conne
     try {
         await connection.close();
 
-        logger.trace(logAttrs, 'Connection successfully closed');
+        context.log.trace(logAttrs, 'Connection successfully closed');
     } catch (err) {
         if (!err.message.includes('NJS-003')) {
-            logger.error({ err, ...logAttrs }, 'Failed to close connection');
+            context.log.error({ err, ...logAttrs }, 'Failed to close connection');
         }
     }
 
@@ -215,20 +310,18 @@ interface CustomExecuteOptions extends ExecuteOptions {
 }
 
 export const execute = async <T>(
-    tracing: $TracingFields,
-    connection: Connection,
+    context: Context,
     sql: string,
     bindParams: BindParameters = {},
     options: CustomExecuteOptions = {},
 ): Promise<Result<T>> => {
-    const { username, id, heldSince, executions, source } = connection;
+    const connection = context.connection || (await getPooledConnection(context));
+
+    const { heldSince, executions, source } = connection;
 
     const logAttrs = {
-        ...tracing,
         sql,
         bindParams,
-        username,
-        id,
         heldSince,
         heldFor: new Date().getTime() - heldSince.getTime(),
         executions,
@@ -240,7 +333,7 @@ export const execute = async <T>(
     const logInterval = dbConfig.stats.execution.enabled
         ? setInterval(
               (): void =>
-                  logger.debug(
+                  context.log.debug(
                       { ...logAttrs, duration: new Date().getTime() - startTime.getTime() },
                       'Execution still in progress',
                   ),
@@ -266,7 +359,7 @@ export const execute = async <T>(
         }
 
         if (dbConfig.logging.logSql) {
-            logger.debug(logAttrs, 'Executing SQL');
+            context.log.debug(logAttrs, 'Executing SQL');
         }
 
         const result = await connection.execute<T>(sqlToExecute, bindVarsToExecute, options);
@@ -275,7 +368,7 @@ export const execute = async <T>(
 
         const { rowsAffected, rows } = result;
 
-        logger.debug(
+        context.log.debug(
             {
                 ...logAttrs,
                 rowsAffected,
@@ -288,7 +381,7 @@ export const execute = async <T>(
         return result;
     } catch (err) {
         if (!(options.keepAlive && options.keepAlive === true)) {
-            await closeConnection(tracing, connection);
+            await closeConnection(context, connection);
         }
 
         throw err;
@@ -298,20 +391,18 @@ export const execute = async <T>(
 };
 
 export const executeMany = async <T>(
-    tracing: $TracingFields,
-    connection: Connection,
+    context: Context,
     sql: string,
     binds: BindParameters[] = [],
     options: CustomExecuteOptions = {},
 ): Promise<Results<T>> => {
-    const { id, username, heldSince, executions, source } = connection;
+    const connection = context.connection || (await getPooledConnection(context));
+
+    const { heldSince, executions, source } = connection;
 
     const logAttrs = {
-        ...tracing,
         sql,
         binds,
-        id,
-        username,
         heldSince,
         executions,
         source,
@@ -319,35 +410,31 @@ export const executeMany = async <T>(
 
     try {
         if (dbConfig.logging.logSql) {
-            logger.debug(logAttrs, 'Bulk executing SQL');
+            context.log.debug(logAttrs, 'Bulk executing SQL');
         }
 
         const results = await connection.executeMany<T>(sql, binds, options);
 
-        logger.debug(logAttrs, 'Bulk execution completed successfully');
+        context.log.debug(logAttrs, 'Bulk execution completed successfully');
 
         return results;
     } catch (err) {
-        logger.error({ err, ...logAttrs }, 'Bulk execution failed');
+        context.log.error({ err, ...logAttrs }, 'Bulk execution failed');
 
         if (!(options.keepAlive && options.keepAlive === true)) {
-            await closeConnection(tracing, connection);
+            await closeConnection(context, connection);
         }
 
         throw err;
     }
 };
 
-export const getSequenceNextVal = async (
-    tracing: $TracingFields,
-    connection: Connection,
-    sequenceName: string,
-): Promise<number> => {
+export const getSequenceNextVal = async (context: Context, sequenceName: string): Promise<number> => {
     interface OutBinds {
         seqVal: number;
     }
 
-    const { rows } = await execute<OutBinds>(tracing, connection, `SELECT ${sequenceName}.NEXTVAL SEQ_VAL FROM DUAL`);
+    const { rows } = await execute<OutBinds>(context, `SELECT ${sequenceName}.NEXTVAL SEQ_VAL FROM DUAL`);
 
     if (rows) {
         return rows[0].seqVal;
@@ -356,52 +443,13 @@ export const getSequenceNextVal = async (
     throw new CustomError(`Unable to get next value for sequence ${sequenceName}`, 500);
 };
 
-type UseConnection<T> = (connection: Connection) => Promise<T>;
-
-export const usingConnection = async <T>(
-    tracing: $TracingFields,
-    fn: UseConnection<T>,
-    opts: {
-        commit?: boolean;
-        conn?: Connection;
-    } = {},
-): Promise<T> => {
-    let connection = null;
-
-    const { moduleName, action } = tracing;
-
-    const keepAlive = opts.conn ? true : false;
-
-    try {
-        connection = opts.conn || (await getPooledConnection(tracing));
-
-        const result = await fn(connection);
-
-        if (opts.commit === true) {
-            await connection.commit();
-        }
-
-        return result;
-    } catch (err) {
-        logger.error({ ...tracing, err }, `${moduleName}.${action} failed`);
-
-        throw err;
-    } finally {
-        if (!keepAlive) {
-            await closeConnection(tracing, connection);
-        }
-    }
-};
-
 interface ResultWithOutBinds<T> extends Result<T> {
     outBinds: T;
 }
 
 export const assertOutBindsExists = <T>(result: Result<T>): ResultWithOutBinds<T> => {
     if (!result.outBinds) {
-        throw new Error(
-            'outBinds was expected to exist but could not be found. Please contact GW, providing the log file',
-        );
+        throw new Error('outBinds was expected to exist but could not be found');
     }
 
     return result as ResultWithOutBinds<T>;
@@ -413,7 +461,7 @@ interface ResultWithRows<T> extends Result<T> {
 
 export const assertRowsExists = <T>(result: Result<T>): ResultWithRows<T> => {
     if (!result.rows) {
-        throw new Error('rows was expected to exist but could not be found. Please contact GW, providing the log file');
+        throw new Error('rows was expected to exist but could not be found');
     }
 
     return result as ResultWithRows<T>;

@@ -4,8 +4,8 @@ import { BIND_OUT } from 'oracledb';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { Connection, execute, assertOutBindsExists } from '..';
-import { $TracingFields } from '../../types';
+import { execute, assertOutBindsExists } from '../db';
+import { Context } from '../../utils';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -22,11 +22,7 @@ export namespace SayHelloPackage {
 }
 
 export const SayHelloPackage = {
-    SayHelloProcedure: async (
-        tracing: $TracingFields,
-        connection: Connection,
-        params: SayHelloPackage.SayHelloProcedureParams,
-    ): Promise<string> => {
+    SayHelloProcedure: async (context: Context, params: SayHelloPackage.SayHelloProcedureParams): Promise<string> => {
         const { name } = params;
 
         const sql = `   BEGIN
@@ -41,10 +37,10 @@ export const SayHelloPackage = {
             message: { dir: BIND_OUT },
         };
 
-        const { outBinds } = assertOutBindsExists(
-            await execute<SayHelloPackage.SayHelloProcedureOutBinds>(tracing, connection, sql, bindParams),
-        );
+        const {
+            outBinds: { message },
+        } = assertOutBindsExists(await execute<SayHelloPackage.SayHelloProcedureOutBinds>(context, sql, bindParams));
 
-        return outBinds.message;
+        return message;
     },
 };
