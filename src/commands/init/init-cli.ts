@@ -23,7 +23,9 @@ export const init = async (opts: Command): Promise<void> => {
             typeof opts.description === 'string' ? `${opts.description}` : null,
         );
 
-        const dbDetails = opts.db
+        const { skipInstall = false, skipHello = false, skipDb = false } = opts;
+
+        const dbDetails = !skipDb
             ? await databasePrompt()
             : {
                   connectionString: '',
@@ -33,9 +35,7 @@ export const init = async (opts: Command): Promise<void> => {
 
         console.log('\n');
 
-        const { skipInstall } = opts;
-
-        await scaffold({ name, description, dbDetails, skipInstall });
+        await scaffold({ name, description, dbDetails, skipInstall, skipHello });
 
         console.log(chalk.green('\nSuccess!'));
 

@@ -43,8 +43,11 @@ Specify the name of the application via the terminal. Name should be lower kebab
 ###### -d --description
 Specify a description via the terminal.
 
-###### --no-db
+###### --skip-db
 gnr8 should not prompt for database credentials, as these will be added later.
+
+###### --skip-hello
+Do not include the hello world resource.
 
 ###### --skip-install
 Do not install dependencies. This will need to be done later with 'npm install'.

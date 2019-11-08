@@ -1,11 +1,12 @@
 // ------------------------------- NODE MODULES -------------------------------
 
-import { copy, readFile, writeFile, rename } from 'fs-extra';
+import { copy, readFile, writeFile, move } from 'fs-extra';
 import path from 'path';
 import klaw from 'klaw';
 import through2 from 'through2';
 import { spawn } from 'child_process';
 import ora from 'ora';
+import del from 'del';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
@@ -22,6 +23,7 @@ interface ScaffoldOptions {
         password: string;
     };
     skipInstall?: boolean;
+    skipHello?: boolean;
 }
 
 const toSpaceCased = (kebabCased: string): string => {
@@ -33,26 +35,33 @@ const toSpaceCased = (kebabCased: string): string => {
         .join(' ');
 };
 
-const createTokens = (opts: ScaffoldOptions): Record<string, string> => {
-    const dbDetails = opts.dbDetails || {
-        connectionString: '',
-        username: '',
-        password: '',
-    };
+const createTokens = (opts: ScaffoldOptions): FindReplace[] => {
+    const {
+        dbDetails: { connectionString, username, password } = {
+            connectionString: '',
+            username: '',
+            password: '',
+        },
+        name,
+        description = '',
+    } = opts;
 
-    return {
-        '#DB_CONN_STRING#': dbDetails.connectionString,
-        '#DB_PASSWORD#': dbDetails.password,
-        '#DB_USER#': dbDetails.username,
-        '#DESCRIPTION#': opts.description || '',
-        '#KEBAB_CASED#': opts.name,
-        '#SPACE_CASED#': toSpaceCased(opts.name),
-    };
+    return [
+        { find: /#DB_CONN_STRING#/g, replace: connectionString },
+        { find: /#DB_PASSWORD#/g, replace: password },
+        { find: /#DB_USER#/g, replace: username },
+        { find: /#DESCRIPTION#/g, replace: description },
+        { find: /#KEBAB_CASED#/g, replace: name },
+        { find: /#SPACE_CASED#/g, replace: toSpaceCased(name) },
+    ];
 };
 
 const excludeDirFilter = through2.obj(function(item, enc, next): void {
-    if (!item.stats.isDirectory()) this.push(item);
-    next();
+    if (!item.stats.isDirectory()) {
+        this.push(item);
+    }
+
+    return next();
 });
 
 const getFiles = (path: string): Promise<string[]> =>
@@ -66,42 +75,45 @@ const getFiles = (path: string): Promise<string[]> =>
             .on('error', (err): void => reject(err));
     });
 
-const replaceInFile = async (path: string, tokens: Record<string, any>): Promise<void> => {
+interface FindReplace {
+    find: RegExp;
+    replace: string;
+}
+
+const replaceInFile = async (path: string, tokens: FindReplace[]): Promise<void> => {
     const file = await readFile(path, 'utf8');
 
     let newFile = file;
 
-    Reflect.ownKeys(tokens).forEach((token): void => {
-        newFile = newFile.replace(new RegExp(String(token), 'g'), tokens[String(token)]);
+    tokens.forEach((token): void => {
+        const { find, replace } = token;
+
+        newFile = newFile.replace(find, replace);
     });
 
     await writeFile(path, newFile);
 };
 
-const replaceInFiles = async (files: string[], tokens: Record<string, string>): Promise<void> => {
-    const promises: Promise<void>[] = [];
-
-    files.forEach((file): number => promises.push(replaceInFile(file, tokens)));
-
-    await Promise.all(promises);
+const replaceInFiles = async (files: string[], tokens: FindReplace[]): Promise<void> => {
+    await files.map((file): Promise<void> => replaceInFile(file, tokens));
 };
 
-const renameFile = async (path: string, tokens: Record<string, any>): Promise<void> => {
+const renameFile = async (path: string, tokens: FindReplace[]): Promise<void> => {
     let newPath = path;
 
-    Reflect.ownKeys(tokens).forEach((token): void => {
-        newPath = newPath.replace(new RegExp(String(token), 'g'), tokens[String(token)]);
+    tokens.forEach((token): void => {
+        const { find, replace } = token;
+
+        newPath = newPath.replace(find, replace);
     });
 
-    await rename(path, newPath);
+    if (newPath !== path) {
+        await move(path, newPath);
+    }
 };
 
-const renameFiles = async (files: string[], tokens: Record<string, string>): Promise<void> => {
-    const promises: Promise<void>[] = [];
-
-    files.forEach((file): number => promises.push(renameFile(file, tokens)));
-
-    await Promise.all(promises);
+const renameFiles = async (files: string[], tokens: FindReplace[]): Promise<void> => {
+    await files.map((file): Promise<void> => renameFile(file, tokens));
 };
 
 const runCommand = async (command: string, cwd: string, description: string): Promise<void> =>
@@ -134,8 +146,28 @@ export const createGitIgnore = async (dest: string): Promise<void> => {
     await writeFile(path.join(dest, '.gitignore'), data);
 };
 
+interface PostmanItem {
+    name: string;
+}
+
+interface PostmanCollection {
+    item: PostmanItem[];
+}
+
+const removeHelloFromDocs = async (dest: string): Promise<void> => {
+    const collectionPath = path.join(dest, 'docs', '#KEBAB_CASED#.postman_collection.json');
+
+    const collection = (await import(collectionPath)) as PostmanCollection;
+
+    const index = collection.item.findIndex((item): boolean => item.name === 'Say Hello');
+
+    collection.item.splice(index, 1);
+
+    await writeFile(collectionPath, JSON.stringify(collection, null, 4));
+};
+
 export const scaffold = async (opts: ScaffoldOptions): Promise<void> => {
-    const { name, skipInstall = false } = opts;
+    const { name, skipInstall = false, skipHello = false } = opts;
 
     const src = path.join(__dirname, '..', '..', '..', 'templates', 'initial');
     const dest = path.join(process.cwd(), name);
@@ -143,12 +175,32 @@ export const scaffold = async (opts: ScaffoldOptions): Promise<void> => {
     await copy(src, dest);
     const files = await getFiles(dest);
 
-    await replaceInFiles(files, createTokens(opts));
-    await renameFiles(files, createTokens(opts));
+    const tokens = createTokens(opts);
+
+    if (skipHello === true) {
+        await removeHelloFromDocs(dest);
+    }
+
+    await replaceInFiles(files, tokens);
+    await renameFiles(files, tokens);
 
     await createGitIgnore(dest);
 
     if (skipInstall !== true) {
         await runCommand('npm install', dest, 'Installing node modules');
+    }
+
+    if (skipHello === true) {
+        await del(path.join(dest, 'src', 'api', 'resources', 'hello'));
+        await replaceInFile(path.join(dest, 'src', 'api', 'resources', 'load-routers.ts'), [
+            {
+                find: /import { helloRouter } from '\.\/hello';[\r\n]*/g,
+                replace: '',
+            },
+            {
+                find: /helloRouter, /g,
+                replace: '',
+            },
+        ]);
     }
 };

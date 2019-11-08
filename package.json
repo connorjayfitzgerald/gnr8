@@ -16,33 +16,34 @@
     "url": "https://github.com/connorjayfitzgerald/gnr8"
   },
   "dependencies": {
-    "chalk": "^2.4.2",
-    "clear": "^0.1.0",
-    "commander": "^2.20.0",
-    "figlet": "^1.2.3",
-    "fs-extra": "^8.1.0",
-    "inquirer": "^6.5.0",
-    "klaw": "^3.0.0",
-    "ora": "^3.4.0",
-    "through2": "^3.0.1"
+    "chalk": "2.4.2",
+    "clear": "0.1.0",
+    "commander": "2.20.0",
+    "del": "5.1.0",
+    "figlet": "1.2.3",
+    "fs-extra": "8.1.0",
+    "inquirer": "6.5.0",
+    "klaw": "3.0.0",
+    "ora": "3.4.0",
+    "through2": "3.0.1"
   },
   "bin": {
     "gnr8": "lib/cli.js"
   },
   "devDependencies": {
-    "@types/clear": "^0.1.0",
-    "@types/figlet": "^1.2.0",
-    "@types/fs-extra": "^8.0.0",
-    "@types/inquirer": "^6.0.3",
-    "@types/klaw": "^3.0.0",
-    "@types/node": "^12.6.8",
-    "@types/through2": "^2.0.34",
-    "@typescript-eslint/eslint-plugin": "^1.13.0",
-    "@typescript-eslint/parser": "^1.13.0",
-    "eslint": "^6.1.0",
-    "eslint-config-prettier": "^6.0.0",
-    "eslint-plugin-prettier": "^3.1.0",
-    "prettier": "^1.18.2",
-    "typescript": "^3.5.3"
+    "@types/clear": "0.1.0",
+    "@types/figlet": "1.2.0",
+    "@types/fs-extra": "8.0.0",
+    "@types/inquirer": "6.0.3",
+    "@types/klaw": "3.0.0",
+    "@types/node": "12.6.8",
+    "@types/through2": "2.0.34",
+    "@typescript-eslint/eslint-plugin": "1.13.0",
+    "@typescript-eslint/parser": "1.13.0",
+    "eslint": "6.1.0",
+    "eslint-config-prettier": "6.0.0",
+    "eslint-plugin-prettier": "3.1.0",
+    "prettier": "1.18.2",
+    "typescript": "3.5.3"
   }
 }
