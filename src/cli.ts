@@ -26,14 +26,6 @@ program
     .option('--skip-db', `Don't prompt for database credentials`)
     .action(init);
 
-// program
-//     .command('init')
-//     .description('Add a new resource to an existing API')
-//     .option('-n ,--name <name>', 'Name of the application')
-//     .option('-d ,--description <description>', 'Brief description of the application')
-//     .option('--no-db', `Don't prompt for database credentials`)
-//     .action(init);
-
 program
     .version(config.version)
     .name('gnr8')
