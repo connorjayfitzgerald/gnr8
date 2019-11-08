@@ -12,3 +12,4 @@ export * from './end-request';
 export * from './error-handler';
 export * from './errors';
 export * from './logger';
+export * from './metrics';

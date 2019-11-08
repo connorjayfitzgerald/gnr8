@@ -29,6 +29,9 @@ const {
     LOG_LEVEL,
     LOG_PRETTY,
     LOG_SQL,
+    METRICS_ENABLED,
+    METRICS_COLLECT_INTERVAL_SECONDS,
+    METRICS_LOG_INTERVAL_SECONDS,
 } = process.env;
 
 // ----------------------------- FILE DEFINITION ------------------------------
@@ -66,6 +69,11 @@ export const appConfig = {
         hash: GIT_HASH,
         name: API_NAME,
         version: API_VERSION,
+    },
+    metrics: {
+        enabled: METRICS_ENABLED === 'true',
+        collectInterval: METRICS_COLLECT_INTERVAL_SECONDS ? parseInt(METRICS_COLLECT_INTERVAL_SECONDS) : 5,
+        logInterval: METRICS_LOG_INTERVAL_SECONDS ? parseInt(METRICS_LOG_INTERVAL_SECONDS) : 60,
     },
 };
 

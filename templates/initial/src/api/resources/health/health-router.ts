@@ -4,10 +4,11 @@ import { Router, Request, Response } from 'express';
 
 // ------------------------------ CUSTOM MODULES ------------------------------
 
-import { endRequest, endRequestWithFailure } from '../../../utils';
+import { endRequest, endRequestWithFailure, getMetrics } from '../../../utils';
 import { assertApiIsHealthy } from '.';
-import { appConfig } from '../../../config';
+import { appConfig, dbConfig } from '../../../config';
 import { methodNotAllowed } from '../../middlewares';
+import { getPoolStats } from '../../../db/db';
 
 // -------------------------------- VARIABLES ---------------------------------
 
@@ -32,7 +33,13 @@ export const healthRouter = (app: Router): Router => {
 
                     await assertApiIsHealthy(context);
 
-                    return endRequest(req, res, 200, appConfig.health);
+                    const pool = await getPoolStats(dbConfig.pool.alias);
+
+                    return endRequest(req, res, 200, {
+                        data: appConfig.health,
+                        pool,
+                        metrics: getMetrics(),
+                    });
                 } catch (err) {
                     return endRequestWithFailure(req, res, 500, [
                         { detail: 'API is currently in an unhealthy state', meta: appConfig.health },
